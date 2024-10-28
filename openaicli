@@ -1,0 +1,59 @@
+#!/bin/python3
+
+from openai import OpenAI
+from openai.types import Model
+import sys
+
+class OpenAIWrapper():
+    def __init__(self):
+        API_KEY = ""
+        with open('api_key.txt', 'r') as file:
+            API_KEY = file.read().rstrip()
+
+        self.client = OpenAI(api_key=API_KEY)
+
+        self.process_command()
+
+    def process_command(self):
+        args = sys.argv
+        
+        usage = "Usage: openaicli command [ARGUMENTS]...\nAvailable commands:\n\tmodels\t\t\t\t\tShow all available models to use from\n\tprompt <MODEL_NAME> <TEXT_PROMPT>\tsend a text prompt to OpenAI API, expects a text response"
+        
+        if (len(args) == 1):
+            print(usage)
+            return
+        
+        output = "No response was given."
+        if (args[1] == "models"):
+            output = self.get_models()
+        elif (args[1] == "prompt"):
+            output = self.prompt(args[2], args[3])
+        else:
+            output = usage
+
+        print(output)
+
+    def get_models(self):
+        output = "All available models are:\n"
+
+        models = self.client.models.list()
+        for m in models.data:
+            output += "- " + m.id + "\n"
+
+        return output
+
+    def prompt(self, model, prompt):
+        response = self.client.chat.completions.create(
+            model=model,
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ]
+        )
+        return response.choices[0].message.content
+
+
+if __name__ == "__main__":
+    OpenAIWrapper()
