@@ -6,28 +6,40 @@ import sys
 
 class OpenAIWrapper():
     def __init__(self):
+        # Read API key from the text file
         API_KEY = ""
         with open('api_key.txt', 'r') as file:
             API_KEY = file.read().rstrip()
 
+        # Main OpenAI API client
         self.client = OpenAI(api_key=API_KEY)
 
+        # Run args parsing task
         self.process_command()
 
     def process_command(self):
-        args = sys.argv
-        
+        in_args = sys.argv
+        num_args = len(in_args)
+
         usage = "Usage: openaicli command [ARGUMENTS]...\nAvailable commands:\n\tmodels\t\t\t\t\tShow all available models to use from\n\tprompt <MODEL_NAME> <TEXT_PROMPT>\tsend a text prompt to OpenAI API, expects a text response"
-        
-        if (len(args) == 1):
+
+        # If no argument given, return the USAGE message
+        if (num_args == 1):
             print(usage)
             return
-        
+
+        # Default message, in case there was some error in the response
         output = "No response was given."
-        if (args[1] == "models"):
+
+        # Commands that return the respective response. If not sufficient arguments or invalid command, return USAGE message
+        if (in_args[1] == "models"):
             output = self.get_models()
-        elif (args[1] == "prompt"):
-            output = self.prompt(args[2], args[3])
+        elif (in_args[1] == "prompt"):
+            if (num_args < 4):
+                print(usage)
+                return
+
+            output = "Response: " +  self.prompt(in_args[2], in_args[3])
         else:
             output = usage
 
@@ -36,6 +48,7 @@ class OpenAIWrapper():
     def get_models(self):
         output = "All available models are:\n"
 
+        # Append all model name to output
         models = self.client.models.list()
         for m in models.data:
             output += "- " + m.id + "\n"
@@ -43,6 +56,10 @@ class OpenAIWrapper():
         return output
 
     def prompt(self, model, prompt):
+        # Re-iterate the prompt. It's just a nice thing to display for continuity
+        print("Prompt: " + prompt)
+
+        # Query OpenAI API with given prompt and model to use
         response = self.client.chat.completions.create(
             model=model,
             messages=[
@@ -52,6 +69,8 @@ class OpenAIWrapper():
                 }
             ]
         )
+
+        # For now, always use the first choice
         return response.choices[0].message.content
 
 
