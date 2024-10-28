@@ -8,12 +8,12 @@ Available commands:
 	prompt <MODEL_NAME> <TEXT_PROMPT>	send a text prompt to OpenAI API, expects a text response
 ```
 
-# Requriement
+### Requriement
 - An OpenAI API key. This should be stored in this root within file named `api_key.txt`
 
-# Installation
+### Installation
 - Run `pip install -r requirements.txt`
 
-# Usage
+### Usage
 - For Linux and MacOS, execute `./openaicli ...`
 - For Windows, it is required to run `python .\openaicli ...` 
